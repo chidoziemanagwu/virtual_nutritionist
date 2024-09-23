@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+{% block content %}
+<div class="max-w-4xl mx-auto mt-10">
+    <h2 class="text-3xl font-bold text-center mb-6">🥗 Meal Plan for {{ user_profile.name }}</h2>
+
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <h3 class="text-2xl font-semibold mb-4">📋 Profile Information</h3>
+        <p><strong>🍎 Dietary Preferences:</strong> {{ user_profile.dietary_preferences }}</p>
+        <p><strong>🎯 Health Goals:</strong> {{ user_profile.health_goals }}</p>
+        <p><strong>🔥 Calorie Limit:</strong> {{ user_profile.calorie_limit }} kcal</p>
+    </div>
+
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <h3 class="text-2xl font-semibold mb-4">🍽️ Your Personalized Meal Plan</h3>
+        <ul class="list-disc list-inside">
+            {% for meal in meal_plan_items %}
+                <li>{{ meal }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <h3 class="text-2xl font-semibold mb-4">🛒 Grocery List</h3>
+        <ul class="list-disc list-inside">
+            {% for item in grocery_list_items %}
+                <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="flex justify-center mt-6">
+        <a href="{% url 'download_meal_plan_pdf' meal_plan.id %}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+            Download PDF 📄
+        </a>
+    </div>
+</div>
+{% endblock %}

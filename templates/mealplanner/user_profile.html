@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="max-w-lg mx-auto mt-10">
+    <h2 class="text-3xl font-bold text-center mb-6">🍽️ Create Your Profile</h2>
+    <p class="text-center text-gray-600 mb-6">Fill in your details to generate a personalized meal plan.</p>
+
+    <form id="mealPlanForm" method="post" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        {% csrf_token %}
+
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
+                Name <span class="text-red-500">*</span>
+            </label>
+            {{ form.name|add_class:"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" }}
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="age">
+                Age <span class="text-red-500">*</span>
+            </label>
+            {{ form.age|add_class:"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" }}
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="dietary_preferences">
+                Dietary Preferences 🍎🥦 <span class="text-red-500">*</span>
+            </label>
+            {{ form.dietary_preferences|add_class:"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" }}
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="health_goals">
+                Health Goals 🏋️ <span class="text-red-500">*</span>
+            </label>
+            {{ form.health_goals|add_class:"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" }}
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="calorie_limit">
+                Calorie Limit 🔥 <span class="text-red-500">*</span>
+            </label>
+            {{ form.calorie_limit|add_class:"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" }}
+        </div>
+
+        <div class="flex items-center justify-between">
+            <button id="submitBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                Generate Meal Plan 💡
+            </button>
+        </div>
+
+        <!-- Loading spinner -->
+        <div id="loadingSpinner" class="hidden mt-4 text-center">
+            <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full text-blue-500" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <p class="mt-2">Generating your meal plan...</p>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('mealPlanForm').addEventListener('submit', function() {
+        // Hide the submit button
+        document.getElementById('submitBtn').classList.add('hidden');
+        
+        // Show the loading spinner
+        document.getElementById('loadingSpinner').classList.remove('hidden');
+    });
+</script>
+{% endblock %}
