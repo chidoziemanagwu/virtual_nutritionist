@@ -48,7 +48,7 @@ We use Swagger for API documentation and testing. Once you have the project runn
 
    ```bash
    http://localhost:8000/swagger/
-
+```
 ### Example Endpoints
 - GET /api/mealplan/ - Fetch personalized meal plans.
 - POST /api/mealplan/create/ - Create a new meal plan.
