@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-i%%spm-gq=sdayd#i4p8o%@gsqgl*e76=u+y*57pif29qa(8=t
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*', 'virtual-nutritionist.onrender.com']
 
 
 # Application definition

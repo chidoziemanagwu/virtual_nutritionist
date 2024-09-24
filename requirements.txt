@@ -117,7 +117,7 @@ openpyxl==3.1.5
 opt-einsum==3.3.0
 packaging==23.2
 pandas==2.1.4
-pathspec==0.12.1
+pathspec
 Pillow==10.0.1
 pipdeptree==2.23.1
 platformdirs==4.3.3
