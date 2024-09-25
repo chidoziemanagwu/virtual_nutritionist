@@ -92,7 +92,7 @@ Please make sure to update the tests and documentation as necessary.
 The Virtual Nutritionist is available under a dual licensing model:
 
 - **Open-source version**: Licensed under the GNU General Public License (GPL) for non-commercial and community use. See the LICENSE file for more details.
-- **Commercial version**: If you wish to use this software for proprietary or commercial purposes, a commercial license is available. Please contact [your email] for licensing options.
+- **Commercial version**: If you wish to use this software for proprietary or commercial purposes, a commercial license is available. Please contact chidozie.managwu@gmail.com for licensing options.
 
 ### Roadmap
 Here are some upcoming features and improvements:
