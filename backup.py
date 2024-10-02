@@ -1,5 +1,4 @@
 import os
-import shutil
 import zipfile
 from datetime import datetime
 
@@ -28,6 +27,7 @@ def backup_data():
             else:
                 print('No database file found.')
 
+            # Backup the 'media' directory if it exists
             media_folder = os.path.join(BASE_DIR, 'media')
             if os.path.exists(media_folder):
                 for foldername, subfolders, filenames in os.walk(media_folder):
@@ -35,6 +35,15 @@ def backup_data():
                         file_path = os.path.join(foldername, filename)
                         backup_zip.write(file_path, os.path.relpath(file_path, BASE_DIR))
                 print(f'Added media files to backup.')
+
+            # Backup the 'static' directory if it exists
+            static_folder = os.path.join(BASE_DIR, 'static')
+            if os.path.exists(static_folder):
+                for foldername, subfolders, filenames in os.walk(static_folder):
+                    for filename in filenames:
+                        file_path = os.path.join(foldername, filename)
+                        backup_zip.write(file_path, os.path.relpath(file_path, BASE_DIR))
+                print(f'Added static files to backup.')
 
         print(f'Backup successful: {backup_file}')
     except Exception as e:
