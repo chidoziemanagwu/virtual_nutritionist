@@ -1,5 +1,11 @@
 from django.urls import path
 from .views import MealPlanFormView, DownloadMealPlanPDFView, MealPlanFormView
+from . import views
+
+urlpatterns = [
+    path('nutrition/', views.nutritional_info_list, name='nutritional_info_list'),
+]
+
 
 urlpatterns = [
     # HTML views

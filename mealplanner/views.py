@@ -7,6 +7,7 @@ from django import forms
 from django.http import HttpResponse
 from reportlab.pdfgen import canvas
 from .models import UserProfile, MealPlan
+from .models import NutritionalInfo
 
 # Load environment variables from .env file
 load_dotenv()
@@ -83,6 +84,10 @@ class MealPlanFormView(FormView):
             'meal_plan_items': meal_plan_items,  # Pass the meal plan list
             'grocery_list_items': grocery_list_items  # Pass the grocery list
         })
+
+def nutritional_info_list(request):
+    nutritional_info = NutritionalInfo.objects.all()
+    return render(request, 'mealplanner/nutritional_info_list.html', {'nutritional_info': nutritional_info})
 
 
 # API to download the meal plan as a PDF
