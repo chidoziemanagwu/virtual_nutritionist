@@ -14,7 +14,6 @@ load_dotenv()
 # Initialize the OpenAI client using the API key from the environment
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 # Form for collecting user profile data
 class UserProfileForm(forms.ModelForm):
     class Meta:
