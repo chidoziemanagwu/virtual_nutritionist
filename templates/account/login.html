@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+
+{% block content %}
+<h2>Sign In</h2>
+
+<!-- Render the normal sign-in form -->
+<form method="POST" action="{% url 'account_login' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit">Sign In</button>
+</form>
+
+<hr>
+
+<!-- Social login options -->
+<h3>Or sign in with:</h3>
+<a href="{% provider_login_url 'google' %}" class="btn btn-primary">Login with Google</a>
+
+{% endblock %}
