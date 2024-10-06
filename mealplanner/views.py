@@ -6,6 +6,8 @@ from django.views.generic import FormView
 from django import forms
 from django.http import HttpResponse
 from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from .models import UserProfile, MealPlan
 from .models import NutritionalInfo
 
@@ -89,11 +91,14 @@ def nutritional_info_list(request):
     nutritional_info = NutritionalInfo.objects.all()
     return render(request, 'mealplanner/nutritional_info_list.html', {'nutritional_info': nutritional_info})
 
-
 # API to download the meal plan as a PDF
 class DownloadMealPlanPDFView(FormView):
     def get(self, request, meal_plan_id):
         meal_plan = get_object_or_404(MealPlan, id=meal_plan_id)
+
+        # Register the Noto Color Emoji font
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        pdfmetrics.registerFont(TTFont('NotoColorEmoji', os.path.join(base_dir, 'fonts', 'NotoColorEmoji-Regular.ttf')))
 
         # Create a PDF response
         response = HttpResponse(content_type='application/pdf')
