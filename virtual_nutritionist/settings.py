@@ -70,9 +70,11 @@ SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': ['profile', 'email'],
         'AUTH_PARAMS': {'access_type': 'online'},
-        'CLIENT_ID': '1001374382394-fiem273li7benj9b4e8igclu5q5eu5t5.apps.googleusercontent.com',
-        'SECRET': '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',
-    },
+        'APP': {
+            'client_id': '1001374382394-fiem273li7benj9b4e8igclu5q5eu5t5.apps.googleusercontent.com',
+            'secret': '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',
+        },
+    }
 }
 
 

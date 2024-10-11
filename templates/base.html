@@ -8,8 +8,15 @@
 </head>
 <body>
     <nav class="bg-gray-800 p-4 text-white">
-        <div class="container mx-auto">
+        <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-lg font-bold">Virtual Nutritionist</h1>
+            <div>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Logout</a>
+                {% else %}
+                    <a href="{% url 'account_login' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Login</a>
+                {% endif %}
+            </div>
         </div>
     </nav>
     <div class="container mx-auto mt-4">
