@@ -1,0 +1,27 @@
+<h1>Nutritional Information</h1>
+<table>
+    <tr>
+        <th>Food</th>
+        <th>Category</th>
+        <th>Calories</th>
+        <th>Protein</th>
+        <th>Fat</th>
+        <th>Carbohydrates</th>
+        <th>Vitamins</th>
+        <th>Minerals</th>
+        <th>Water Content</th>
+    </tr>
+    {% for item in nutritional_info %}
+    <tr>
+        <td>{{ item.food_name }}</td>
+        <td>{{ item.get_category_display }}</td>
+        <td>{{ item.calories }}</td>
+        <td>{{ item.protein }}</td>
+        <td>{{ item.fat }}</td>
+        <td>{{ item.carbohydrates }}</td>
+        <td>{{ item.vitamins }}</td>
+        <td>{{ item.minerals }}</td>
+        <td>{{ item.water_content }}</td>
+    </tr>
+    {% endfor %}
+</table>
