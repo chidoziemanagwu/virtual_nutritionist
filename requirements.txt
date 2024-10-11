@@ -63,7 +63,7 @@ django-widget-tweaks==1.5.0
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.3.0
 djoser==2.2.0
-docutils>=0.20,<0.22
+docutils
 drf-yasg==1.21.7
 et-xmlfile==1.1.0
 executing==2.0.0
