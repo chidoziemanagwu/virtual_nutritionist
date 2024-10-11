@@ -12,7 +12,6 @@ asttokens==2.4.0
 attrs==23.2.0
 autobahn==23.6.2
 Automat==22.10.0
-awscli==1.30.6
 babel==2.16.0
 backcall==0.2.0
 beautifulsoup4==4.12.3
