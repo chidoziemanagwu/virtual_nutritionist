@@ -49,7 +49,7 @@ debugpy==1.8.0
 decorator==5.1.1
 defusedxml==0.8.0rc2
 distro==1.9.0
-Django==4.2.5
+Django==4.2.16
 django-allauth==65.0.2
 django-channels-jwt-auth-middleware==1.0.0
 django-cors-headers==4.3.0
