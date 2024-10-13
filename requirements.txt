@@ -245,7 +245,7 @@ watchdog==5.0.2
 wcwidth==0.2.8
 weasyprint==62.3
 webencodings==0.5.1
-Werkzeug==3.0.1
+Werkzeug==3.0.3
 whitenoise==6.7.0
 wsproto==1.2.0
 yarl==1.9.4
