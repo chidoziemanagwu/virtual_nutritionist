@@ -1,32 +1,41 @@
 import os
-from openai import OpenAI
+from datetime import date, timedelta
 from dotenv import load_dotenv
-from django.shortcuts import render, get_object_or_404
-from django.views.generic import FormView
+from openai import OpenAI
+
 from django import forms
 from django.http import HttpResponse
-from reportlab.pdfgen import canvas
+from django.shortcuts import get_object_or_404, render
+from django.views.generic import FormView
+
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from .models import UserProfile, MealPlan
-from .models import NutritionalInfo
+from reportlab.pdfgen import canvas
 
-# Load environment variables from .env file
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .models import Badge, MealPlan, NutritionalInfo, UserBadge, UserProfile, UserStreak
+
+# Load environment variables
 load_dotenv()
 
-# Initialize the OpenAI client using the API key from the environment
-
+# Initialize OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+
 # Form for collecting user profile data
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ['name', 'age', 'dietary_preferences', 'health_goals', 'calorie_limit']
 
-# Function to generate meal plan and grocery list using OpenAI
+
+# Helper function to generate meal plan and grocery list
 def generate_meal_plan(user_profile):
     try:
-        # Use OpenAI client to generate both meal plan and grocery list
         prompt = (
             f"Generate a meal plan for a {user_profile.age}-year-old who follows a {user_profile.dietary_preferences} diet "
             f"and wants to achieve {user_profile.health_goals}. The calorie limit is {user_profile.calorie_limit}. "
@@ -36,44 +45,36 @@ def generate_meal_plan(user_profile):
         response = client.chat.completions.create(
             messages=[{"role": "user", "content": prompt}],
             model="gpt-3.5-turbo",
-            max_tokens=500  # Adjust token limit as needed
+            max_tokens=500
         )
 
-        # Extract the content
         meal_plan_response = response.choices[0].message.content
 
-        # Split the response into meal plan and grocery list using markers
         if "Grocery List:" in meal_plan_response:
             meal_plan, grocery_list = meal_plan_response.split("Grocery List:")
         else:
             meal_plan = meal_plan_response
             grocery_list = "Not available."
 
-        # Strip any excess whitespace
         return meal_plan.strip(), grocery_list.strip()
 
     except Exception as e:
         return str(e), ""
 
-# HTML view to handle user profile creation and meal plan generation
-# Updated form view to split the meal plan and grocery list into lists
+
+# Form View to handle user profile creation and meal plan display
 class MealPlanFormView(FormView):
     template_name = 'mealplanner/user_profile.html'
     form_class = UserProfileForm
     success_url = '/'
 
     def form_valid(self, form):
-        # Save the user profile
         user_profile = form.save()
-
-        # Generate the meal plan and grocery list using OpenAI
         meal_plan_text, grocery_list = generate_meal_plan(user_profile)
 
-        # Split the meal plan and grocery list into lists (assuming '-' separates items)
         meal_plan_items = [item.strip() for item in meal_plan_text.split('-') if item.strip()]
         grocery_list_items = [item.strip() for item in grocery_list.split('-') if item.strip()]
 
-        # Save the meal plan and grocery list to the database
         meal_plan = MealPlan.objects.create(
             user=user_profile,
             meal_plan=meal_plan_text,
@@ -83,28 +84,27 @@ class MealPlanFormView(FormView):
         return render(self.request, 'mealplanner/meal_plan_result.html', {
             'meal_plan': meal_plan,
             'user_profile': user_profile,
-            'meal_plan_items': meal_plan_items,  # Pass the meal plan list
-            'grocery_list_items': grocery_list_items  # Pass the grocery list
+            'meal_plan_items': meal_plan_items,
+            'grocery_list_items': grocery_list_items
         })
+
 
 def nutritional_info_list(request):
     nutritional_info = NutritionalInfo.objects.all()
     return render(request, 'mealplanner/nutritional_info_list.html', {'nutritional_info': nutritional_info})
 
-# API to download the meal plan as a PDF
+
+# View to generate and download meal plan PDF
 class DownloadMealPlanPDFView(FormView):
     def get(self, request, meal_plan_id):
         meal_plan = get_object_or_404(MealPlan, id=meal_plan_id)
 
-        # Register the Noto Color Emoji font
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         pdfmetrics.registerFont(TTFont('NotoColorEmoji', os.path.join(base_dir, 'fonts', 'NotoColorEmoji-Regular.ttf')))
 
-        # Create a PDF response
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="meal_plan_{meal_plan.id}.pdf"'
 
-        # Generate the PDF
         p = canvas.Canvas(response)
         p.setFont("Helvetica-Bold", 16)
         p.drawString(100, 800, f"🥗 Meal Plan for {meal_plan.user.name}")
@@ -124,3 +124,41 @@ class DownloadMealPlanPDFView(FormView):
         p.save()
 
         return response
+
+
+# Gamification API Endpoint
+class GamificationStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        today = date.today()
+        streak, created = UserStreak.objects.get_or_create(user=request.user)
+
+        if not created:
+            if streak.last_logged_date == today - timedelta(days=1):
+                streak.current_streak += 1
+                if streak.current_streak > streak.longest_streak:
+                    streak.longest_streak = streak.current_streak
+                streak.save()
+            elif streak.last_logged_date < today - timedelta(days=1):
+                streak.current_streak = 1
+                streak.save()
+
+        user_badges = UserBadge.objects.filter(user=request.user).select_related('badge')
+        badges_data = [
+            {
+                "name": ub.badge.name,
+                "description": ub.badge.description,
+                "icon_name": ub.badge.icon_name,
+                "earned_at": ub.earned_at.strftime("%Y-%m-%d %H:%M:%S")
+            }
+            for ub in user_badges
+        ]
+
+        return Response({
+            "current_streak": streak.current_streak,
+            "longest_streak": streak.longest_streak,
+            "last_logged_date": streak.last_logged_date,
+            "earned_badges_count": len(badges_data),
+            "badges": badges_data
+        }, status=status.HTTP_200_OK)
