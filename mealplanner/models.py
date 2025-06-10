@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone  # Ensure this comes from django.utils
 
 # Food Categories for the six classes of food
 FOOD_CATEGORIES = [
@@ -77,3 +78,33 @@ class UserBadge(models.Model):
 
     def __str__(self):
         return f"{self.user.username} unlocked {self.badge.name}"
+
+
+
+class UserStreak(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='streak')
+    current_streak = models.PositiveIntegerField(default=1)
+    longest_streak = models.PositiveIntegerField(default=1)
+    last_logged_date = models.DateField(default=timezone.localdate)  # FIXED
+
+    def __str__(self):
+        return f"{self.user.username} - {self.current_streak} Day Streak"
+
+
+class DailyNutritionCheckIn(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='nutrition_checkins')
+    log_date = models.DateField(default=timezone.localdate)
+    breakfast_completed = models.BooleanField(default=False)
+    lunch_completed = models.BooleanField(default=False)
+    dinner_completed = models.BooleanField(default=False)
+    water_intake_ml = models.PositiveIntegerField(default=0)
+    met_calorie_target = models.BooleanField(default=False)
+    notes = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'log_date')
+        ordering = ['-log_date']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.log_date}"

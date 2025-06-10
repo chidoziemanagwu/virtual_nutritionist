@@ -16,7 +16,12 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils import timezone
+from django.utils import timezone
+from .models import Badge, MealPlan, NutritionalInfo, UserBadge, UserProfile, UserStreak, DailyNutritionCheckIn
+from .serializers import DailyNutritionCheckInSerializer
 from .models import Badge, MealPlan, NutritionalInfo, UserBadge, UserProfile, UserStreak
 
 # Load environment variables
@@ -162,3 +167,43 @@ class GamificationStatusView(APIView):
             "earned_badges_count": len(badges_data),
             "badges": badges_data
         }, status=status.HTTP_200_OK)
+
+
+class DailyNutritionCheckInView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = DailyNutritionCheckInSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        checkin = serializer.save(user=request.user)
+        log_date = checkin.log_date
+
+        streak, created = UserStreak.objects.get_or_create(
+            user=request.user,
+            defaults={
+                'current_streak': 1,
+                'longest_streak': 1,
+                'last_logged_date': log_date
+            }
+        )
+
+        # Do not change streak if user is updating the same day
+        if streak.last_logged_date != log_date:
+            if streak.last_logged_date == log_date - timedelta(days=1):
+                streak.current_streak += 1
+            else:
+                streak.current_streak = 1
+
+            if streak.current_streak > streak.longest_streak:
+                streak.longest_streak = streak.current_streak
+
+            streak.last_logged_date = log_date
+            streak.save()
+
+        return Response({
+            "message": "Daily check-in saved successfully.",
+            "checkin": DailyNutritionCheckInSerializer(checkin).data,
+            "current_streak": streak.current_streak,
+            "longest_streak": streak.longest_streak
+        }, status=status.HTTP_201_CREATED)
