@@ -61,7 +61,7 @@ class UserStreak(models.Model):
 class Badge(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField()
-    icon_name = models.CharField(max_length=50, help_string="CSS icon class or filename")
+    icon_name = models.CharField(max_length=50, help_text="CSS icon class or filename")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
