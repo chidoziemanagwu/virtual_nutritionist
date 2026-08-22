@@ -19,11 +19,12 @@ from rest_framework.views import APIView
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-from django.utils import timezone
 from .models import Badge, MealPlan, NutritionalInfo, UserBadge, UserProfile, UserStreak, DailyNutritionCheckIn
 from .serializers import DailyNutritionCheckInSerializer
 from .models import Badge, MealPlan, NutritionalInfo, UserBadge, UserProfile, UserStreak
+from rest_framework import status
 
+from .models import DailyNutritionCheckIn, UserStreak
 # Load environment variables
 load_dotenv()
 
@@ -207,3 +208,54 @@ class DailyNutritionCheckInView(APIView):
             "current_streak": streak.current_streak,
             "longest_streak": streak.longest_streak
         }, status=status.HTTP_201_CREATED)
+
+
+class WeeklyNutritionSummaryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        today = timezone.localdate()
+        week_start = today - timedelta(days=6)
+
+        checkins = DailyNutritionCheckIn.objects.filter(
+            user=request.user,
+            log_date__range=[week_start, today]
+        ).order_by('log_date')
+
+        streak, _ = UserStreak.objects.get_or_create(user=request.user)
+
+        breakfast_count = checkins.filter(breakfast_completed=True).count()
+        lunch_count = checkins.filter(lunch_completed=True).count()
+        dinner_count = checkins.filter(dinner_completed=True).count()
+        calorie_target_count = checkins.filter(met_calorie_target=True).count()
+
+        total_water = sum(checkin.water_intake_ml for checkin in checkins)
+        avg_water = round(total_water / checkins.count(), 2) if checkins.exists() else 0
+
+        summary_data = [
+            {
+                "log_date": checkin.log_date,
+                "breakfast_completed": checkin.breakfast_completed,
+                "lunch_completed": checkin.lunch_completed,
+                "dinner_completed": checkin.dinner_completed,
+                "water_intake_ml": checkin.water_intake_ml,
+                "met_calorie_target": checkin.met_calorie_target,
+                "notes": checkin.notes,
+            }
+            for checkin in checkins
+        ]
+
+        return Response({
+            "week_start": week_start,
+            "week_end": today,
+            "checkins_count": checkins.count(),
+            "breakfast_completed_count": breakfast_count,
+            "lunch_completed_count": lunch_count,
+            "dinner_completed_count": dinner_count,
+            "calorie_target_days": calorie_target_count,
+            "total_water_intake_ml": total_water,
+            "average_water_intake_ml": avg_water,
+            "current_streak": streak.current_streak,
+            "longest_streak": streak.longest_streak,
+            "daily_summary": summary_data,
+        }, status=status.HTTP_200_OK)
